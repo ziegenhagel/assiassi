@@ -16,15 +16,15 @@ class CreateTeamsTable extends Migration
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
             $table->text("title");
-            $table->integer("meal_vegans");
-            $table->integer("meal_vegetarians");
-            $table->integer("meal_omnivores");
-            $table->integer("week");
-            $table->integer("year");
-            $table->text("meal_annotation");
-            $table->char("letter",1);
-            $table->boolean("is_special_course");
-            $table->enum("sd_status",["queue","process","ready"]);
+            $table->integer("meal_vegans")->nullable();
+            $table->integer("meal_vegetarians")->nullable();
+            $table->integer("meal_omnivores")->nullable();
+            $table->integer("week")->nullable();
+            $table->integer("year")->nullable();
+            $table->text("meal_annotation")->nullable();
+            $table->char("letter",1)->nullable();
+            $table->boolean("is_special_course")->default(false);
+            $table->enum("sd_status",["queue","process","ready"])->nullable();
             $table->timestamps();
         });
     }

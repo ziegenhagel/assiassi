@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Team;
+use App\Models\TeamMeal;
 use Illuminate\Http\Request;
 
-class TeamController extends Controller
+class TeamMealController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -35,16 +35,16 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
-        return Team::create($request->all());
+        //
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Team  $team
+     * @param  \App\Models\TeamMeal  $teamMeal
      * @return \Illuminate\Http\Response
      */
-    public function show(Team $team)
+    public function show(TeamMeal $teamMeal)
     {
         //
     }
@@ -52,10 +52,10 @@ class TeamController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Team  $team
+     * @param  \App\Models\TeamMeal  $teamMeal
      * @return \Illuminate\Http\Response
      */
-    public function edit(Team $team)
+    public function edit(TeamMeal $teamMeal)
     {
         //
     }
@@ -64,10 +64,10 @@ class TeamController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Team  $team
+     * @param  \App\Models\TeamMeal  $teamMeal
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Team $team)
+    public function update(Request $request, TeamMeal $teamMeal)
     {
         //
     }
@@ -75,10 +75,10 @@ class TeamController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Team  $team
+     * @param  \App\Models\TeamMeal  $teamMeal
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Team $team)
+    public function destroy(TeamMeal $teamMeal)
     {
         //
     }
