@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Team;
+use App\Models\Shooting;
 use Illuminate\Http\Request;
 
 class TeamController extends Controller
@@ -14,7 +15,7 @@ class TeamController extends Controller
      */
     public function index()
     {
-        //
+        return Team::with("shootings")->get();
     }
 
     /**
@@ -69,7 +70,16 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
-        //
+        $shootings=$request->get("shootings");
+
+        foreach($shootings as $shooting) {
+            Shooting::find($shooting["id"])->update($shooting);
+        }
+
+        $team_update = $request->all();
+        unset($team_update["shootings"]);
+
+        return $team->update($team_update);
     }
 
     /**
@@ -80,6 +90,7 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
-        //
+        $t=Team::truncate();
+        return true;
     }
 }

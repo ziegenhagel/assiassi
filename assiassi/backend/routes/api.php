@@ -21,4 +21,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::apiResource('teams', TeamController::class);
-
+Route::delete('teams','App\Http\Controllers\TeamController@destroy');
+Route::put('team/{team}','App\Http\Controllers\TeamController@update');
+Route::post('team/{team}/shooting','App\Http\Controllers\ShootingController@store');

@@ -69,7 +69,8 @@ class TeamMealController extends Controller
      */
     public function update(Request $request, TeamMeal $teamMeal)
     {
-        //
+        $teamMeal=TeamMeal::firstOrCreate($teamMeal);
+        return $teamMeal;
     }
 
     /**

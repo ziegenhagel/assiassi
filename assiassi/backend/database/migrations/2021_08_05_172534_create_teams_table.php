@@ -24,7 +24,21 @@ class CreateTeamsTable extends Migration
             $table->text("meal_annotation")->nullable();
             $table->char("letter",1)->nullable();
             $table->boolean("is_special_course")->default(false);
-            $table->enum("sd_status",["queue","process","ready"])->nullable();
+            $table->enum("sd_status",["none","queue","process","ready"])->default("none");
+
+            $table->enum("meal_2_0",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_2_1",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_2_2",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_3_0",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_3_1",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_3_2",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_4_0",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_4_1",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_4_2",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_5_0",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_5_1",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+            $table->enum("meal_5_2",["Im Camp", "Am Set", "Selbstversorgung"])->default("Im Camp");
+
             $table->timestamps();
         });
     }

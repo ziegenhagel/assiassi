@@ -13,7 +13,7 @@ class CreateTeamMealsTable extends Migration
      */
     public function up()
     {
-        Schema::create('team_meals', function (Blueprint $table) {
+        Schema::create('_trash_team_meals', function (Blueprint $table) {
             $table->id();
             $table->bigInteger("team_id");
             $table->integer("day_of_week");
@@ -32,6 +32,6 @@ class CreateTeamMealsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('team_meals');
+        Schema::dropIfExists('_trash_team_meals');
     }
 }

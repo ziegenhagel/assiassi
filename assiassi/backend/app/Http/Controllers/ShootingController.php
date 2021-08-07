@@ -35,7 +35,7 @@ class ShootingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return Shooting::create($request->all());
     }
 
     /**
