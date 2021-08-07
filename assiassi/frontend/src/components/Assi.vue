@@ -86,10 +86,10 @@
 
                 <v-card>
                     <div
-                        v-for="sd_status in 'none,queue,process,ready'.split(',')"
+                        v-for="{sd_status,label} in 'none:Karte in Kamera,queue:Warteschlange,process:Datenverarbeitung,ready:Schnittbereit'.split(',').map(string=>{let w=string.split(':');return {sd_status:w[0],label:w[1]}})"
                         :key="sd_status"
                     >
-                        <h2>SD {{sd_status}}</h2>
+                        <h2>{{label}}</h2>
                         <v-chip v-for="team in teams.filter(team=>team.sd_status==sd_status)"
                             :key="'team_id_sd'+team.id" @click="setTeam(team)">
                             {{team.letter}}
@@ -99,21 +99,19 @@
             </v-col>
             <v-col :cols="is_admin?10:12">
 
-                <v-card v-if="is_admin">
+                <!-- Team Admin -->
+                <v-card v-if="is_admin"> <h1>{{current_team.title}}</h1> </v-card>
+                <v-stepper v-model="current_team.sd_status" @change="updateTeam()" non-linear>
+                  <v-stepper-header>
 
-                    <!-- Team Admin -->
+                    <v-stepper-step editable step="none" complete edit-icon="mdi-check"> Karte in Kamera </v-stepper-step> <v-divider></v-divider>
+                    <v-stepper-step editable step="queue" :complete="current_team.sd_status!='none'" edit-icon="mdi-check"> Warteschlange </v-stepper-step> <v-divider></v-divider>
+                    <v-stepper-step editable step="process" :complete="current_team.sd_status=='process'||current_team.sd_status=='ready'" edit-icon="mdi-check"> Datenverarbeitung </v-stepper-step> <v-divider></v-divider>
+                    <v-stepper-step editable step="ready" complete-icon="mdi-check" :complete="current_team.sd_status=='ready'" edit-icon="mdi-check"> Schnittbereit </v-stepper-step> 
 
-                    <h1>{{current_team.title}}</h1>
+                  </v-stepper-header>
+                </v-stepper>
 
-                    <v-radio-group @change="updateTeam()" v-model="current_team.sd_status">
-                      <v-radio
-                        v-for="sd_status in 'none,queue,process,ready'.split(',')"
-                        :key="'admin_sd_'+sd_status"
-                        :label="'SD '+sd_status"
-                        :value="sd_status"
-                      ></v-radio>
-                    </v-radio-group>
-                </v-card>
 
 
                 <!-- Wochenübersicht -->
@@ -345,5 +343,8 @@ main .v-sheet {
 }
 .v-card .v-chip {
     margin-right:5px;
+}
+.v-stepper.v-sheet {
+    padding:0;border:none;box-shadow:none;
 }
 </style>
