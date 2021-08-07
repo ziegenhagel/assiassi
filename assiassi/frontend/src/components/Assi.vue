@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div v-if="is_board">
+    <Board :teams="teams"></Board>
+  </div>
+  <div v-else>
 
     <v-app-bar
     flat
@@ -196,8 +199,10 @@
 <script>
 import VueCookies from 'vue-cookies'
 import api_call from "../Api"
+import Board from './Board';
 
 export default {
+  components:{Board},
   name: 'Assi',
   props: ["cookieTeam"],
   data: function() {
@@ -206,6 +211,7 @@ export default {
         current_meal: {meal_omnivores:null,meal_vegans:null,meal_vegetarians:null,meal_total:null,meal_annotation:""},
         current_team_meal: null,
         is_admin: false,
+        is_board: false,
         teams: []
       }
   },
@@ -236,6 +242,10 @@ export default {
         this.current_team.meal_omnivores=this.current_meal.meal_omnivores
         this.current_team.meal_annotation=this.current_meal.meal_annotation
         this.updateTeam()
+    },
+    board: function() {
+        VueCookies.set('is_board' , true, "1year") 
+        this.is_board = true
     },
     lock: function() {
         VueCookies.set('team.letter' , this.current_team.letter, "1year") 
@@ -299,6 +309,13 @@ export default {
         .then(d=>console.log(d))
     },
     loadData: function() {
+
+        // show board if cookie present
+        console.log("is_board",VueCookies.get('is_board'))
+        if(VueCookies.get('is_board')) {
+            this.is_board=true
+        }
+
         api_call("teams","get")
         .then((d)=>{
             this.teams = d;
@@ -310,7 +327,7 @@ export default {
                     d=this.teams.filter(team=>team.letter == VueCookies.get('team.letter'))
                     // backend seeems locked
                 }
-                this.setTeam(d[0])
+                this.setTeam(this.teams[0])
                 if(VueCookies.get('team.letter') != undefined && VueCookies.get('team.letter') != "")  {is_admin=false}
             }
             console.log("is ad",is_admin)
