@@ -44,9 +44,9 @@
                         :key="JSON.stringify(check)" >
                         <img v-if="check.check == 'out'" src="../assets/art/checkout.jpg" width="50"> 
                         <img v-else src="../assets/art/checkin.jpg" width="50"> 
-                        <v-chip :color="timeOver(check.time) ? 'orange' : 'gray'">{{check.time}}</v-chip>
+                        <v-chip :color="check.completed=='1' ? 'green' : timeOver(check.time) ? 'red' : 'gray'">{{check.time}}</v-chip>
                         <v-chip @click="setTeam(check.team)">{{check.team.letter}}</v-chip> 
-                        <v-chip v-if="false" color="green" @click="console.log()">OK</v-chip>
+                        <v-chip v-if="check.completed!='1'" color="green" @click="checkCompleted(check)">OK</v-chip>
                     </div>
                 </v-card>
 
@@ -87,14 +87,15 @@
                 <!-- Wochenübersicht -->
 
                 <v-row id="weeks">
-                  <v-col cols="3" v-for="(day_of_week,day_of_week_index) in 'Dienstag,Mittwoch,Donnerstag,Freitag'.split(',')" :key="day_of_week">
+                  <v-col cols="3" :style="'opacity:'+((day_of_week_index) < day_of_week ? '.5;pointer-events:none' : '1')" 
+                    v-for="{day_of_week_name,day_of_week_index} in [{day_of_week_index:2,day_of_week_name:'Dienstag'},{day_of_week_index:3,day_of_week_name:'Mittwoch'},{day_of_week_index:4,day_of_week_name:'Donnerstag'},{day_of_week_index:5,day_of_week_name:'Freitag'}]" :key="day_of_week_index">
 
-                    <v-card> <h2> {{day_of_week}} </h2> </v-card>
+                    <v-card> <h2> {{day_of_week_name}} </h2> </v-card>
 
                     <!-- Essen angeben -->
                     <v-card>
                         <div :key="'meal'+day_of_week_index+'_'+meal_of_day_index" v-for="(meal_of_day,meal_of_day_index) in 'Frühstück,Mittagessen,Abendbrot'.split(',')">
-                            <v-select @change="updateTeam" v-model="current_team['meal_'+(day_of_week_index+2)+'_'+meal_of_day_index]" :label="'Wo esst ihr '+meal_of_day+'?'" :items="'Im Camp,Am Set,Selbstversorgung'.split(',')"></v-select>
+                            <v-select @change="updateTeam" v-model="current_team['meal_'+(day_of_week_index)+'_'+meal_of_day_index]" :label="'Wo esst ihr '+meal_of_day+'?'" :items="'Im Camp,Am Set,Selbstversorgung'.split(',')"></v-select>
                         </div>
                     </v-card>
 
@@ -175,6 +176,7 @@ export default {
   },
   computed: {
     is_admin: function() {return this.cookieTeam < 1 || this.cookieTeam == undefined},
+    day_of_week: function() {return 3},
     shootings: function() {
         let shootings = []
         this.teams.map(team=>team.shootings.map(shooting=>shootings.push(shooting)))
@@ -182,11 +184,11 @@ export default {
     },
     camera_checks: function() {
         let checks = [] 
-        this.shootings.map((shooting)=>{
+        this.shootings.filter(shooting=>shooting.day_of_week == this.day_of_week).map((shooting)=>{
             if(shooting.camera_checkout!=null)
-                checks.push({check:"out",team:this.teamById(shooting.team_id),time:shooting.camera_checkout})
+                checks.push({completed:shooting.camera_checkout_completed,check:"out",team:this.teamById(shooting.team_id),shooting_id:shooting.id,time:shooting.camera_checkout})
             if(shooting.camera_checkin!=null)
-                checks.push({check:"in",team:this.teamById(shooting.team_id),time:shooting.camera_checkin})
+                checks.push({completed:shooting.camera_checkin_completed,check:"in",team:this.teamById(shooting.team_id),shooting_id:shooting.id,time:shooting.camera_checkin})
         })
 
         return this.timeSort(checks)
@@ -194,6 +196,10 @@ export default {
     }
   },
   methods: {
+    checkCompleted: function(check) {
+        check.team.shootings.filter(shooting=>shooting.id==check.shooting_id)[0]["camera_check"+check.check+"_completed"]="1"
+        this.updateTeam(check.team)
+    },
     minsToTime: function(time_mins) {
     return Math.floor(time_mins/60)+":"+time_mins%60
     },
@@ -214,13 +220,7 @@ export default {
     timeOver: function(time_string) {
         let time_parts = time_string.split(":")
         var today = new Date();
-        console.log("Ich möchte jetzt Zeiten vergleichen")
-        console.log("Das ist meine Eingabeuhrzeit: "+time_string)
-        console.log("So habe ich ihn zerlegt: ",parseInt(time_parts[0]) +":"+parseInt(time_parts[1]) )
-        console.log("Das ist die jetzige Uhrzeit: "+today.getHours()+":"+today.getMinutes())
-        let timeOver = parseInt(time_parts[0]) <= today.getHours() && parseInt(time_parts[1]) <= today.getMinutes()  
-        if(timeOver) { console.log("Ich komme zur Erkenntnis, dass die Zeit vorbei ist, weil "+parseInt(time_parts[0]) +">"+ today.getHours()) }
-        else { console.log("Ich komme zur Erkenntnis, dass die NICHT Zeit vorbei ist, weil "+parseInt(time_parts[0]) +"<"+ today.getHours()) }
+        let timeOver = parseInt(time_parts[0]) < today.getHours() || (parseInt(time_parts[0]) == today.getHours() && parseInt(time_parts[1]) <= today.getMinutes() )
         return timeOver
     },
     createTeam: function() {
@@ -242,8 +242,10 @@ export default {
             api_call("teams","delete")
             .then(()=>this.loadData())
     },
-    updateTeam: function() {
-        api_call("team/"+this.current_team.id,"put",this.current_team)
+    updateTeam: function(team) {
+        if(team==undefined || team.id==undefined)
+            team=this.current_team
+        api_call("team/"+team.id,"put",team)
         .then(d=>console.log(d))
     },
     loadData: function() {

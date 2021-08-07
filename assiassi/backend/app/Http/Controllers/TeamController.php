@@ -78,6 +78,7 @@ class TeamController extends Controller
 
         $team_update = $request->all();
         unset($team_update["shootings"]);
+        unset($team_update["meal_0_0"]);
 
         return $team->update($team_update);
     }
@@ -90,6 +91,7 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
+        Shooting::truncate();
         $t=Team::truncate();
         return true;
     }
