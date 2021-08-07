@@ -1,29 +1,36 @@
 <template>
-  <div class="hello">
+  <div>
 
     <v-app-bar
     flat
     app
-    color="white"
+    color="orange"
     >
       <v-container fluid class="py-0 fill-height">
 
-        <img src="../assets/logo.jpg" id="logo" height="56">
+        <img src="../assets/logo.png" style="margin-top:6px;margin-right:20px;" height="50">
 
-        <v-btn
-          v-for="team in teams"
-          :key="team.id"
-          text
-          :color="team==current_team?'primary':'normal'"
-          @click="setTeam(team)"
-        >
-          {{ team.letter }}
-        </v-btn>
+        <div v-if="is_admin">
+            <v-btn
+              v-for="team in teams"
+              :key="team.id"
+              :outlined="!(current_team != undefined && team.id==current_team.id)"
+              color="white"
+              @click="setTeam(team)"
+            >
+              {{ team.letter }}
+            </v-btn>
 
-        <v-btn v-if="is_admin" text @click="createTeam">+</v-btn> 
-        <v-btn v-if="is_admin" color="red" @click="deleteTeams">Alle Teams löschen</v-btn>
+            <v-btn text @click="createTeam" color="white">+</v-btn> 
+        </div>
+        <h1 v-else style="text-align:center;width:100%;position:absolute"> {{current_team.title}}</h1>
 
         <v-spacer></v-spacer>
+
+        <v-btn text v-if="is_admin" @click="deleteTeams">RESET</v-btn>
+        <v-btn text v-if="is_admin" @click="board">BOARD</v-btn>
+        <v-btn v-if="is_admin" text @click="lock">LOCK</v-btn> 
+        <v-btn v-else text @click="unlock">UNLOCK</v-btn> 
 
         </v-container>
     </v-app-bar>
@@ -32,9 +39,34 @@
 
     <v-main>
         <v-container fluid v-if="current_team">
-        
-            <v-row>
-              <v-col cols="2">
+
+            <v-card style="max-width:800px;margin:auto" v-if="!is_admin && current_team.meal_vegans == null && current_team.meal_vegetarians == null && current_team.meal_omnivores == null">
+                <h1>Anzahl Personen</h1>
+                <v-text-field v-model="current_meal.meal_total" type="number" label="Anzahl aller Personen im Team (inklusive Dozent:in)"></v-text-field>
+                <h1>Essgewohnheiten</h1>
+                <v-row class="textcenter"><v-col cols="4">
+                    <img src="../assets/art/vegan.png" height="100">
+                    <v-text-field v-model="current_meal.meal_vegans" type="number" label="Anzahl Vegan"></v-text-field>
+                </v-col><v-col cols="4">
+                    <img src="../assets/art/vegetarian.png" height="100">
+                    <v-text-field v-model="current_meal.meal_vegetarians" type="number" label="Anzahl Vegetarisch"></v-text-field>
+                </v-col><v-col cols="4">
+                    <img src="../assets/art/carnivor.png" height="100">
+                    <v-text-field v-model="current_meal.meal_omnivores" type="number" label="Anzahl Omnivor"></v-text-field>
+                </v-col></v-row>
+                <h1>Unverträglichkeiten</h1>
+                Beispiel:<br/>Es gibt eine Laktoseintolerante Veganerin und einen Erdnussallergischen Vegetarier, dann schreibt "1x Laktose (Vegan), 1x Ernussallergie (Vegetarisch)" 
+                <v-text-field label="Aufzählung von Unverträglichkeiten"></v-text-field>
+
+                <v-btn block v-if="current_meal.meal_total != parseInt(current_meal.meal_omnivores)
+                + parseInt(current_meal.meal_vegans) + parseInt(current_meal.meal_vegetarians) " color="warning">Team Informationen speichern (Teamanzahl stimmt nicht)</v-btn>
+                <v-btn block v-else color="primary" @click="storeMeals">Team Informationen speichern</v-btn>
+
+                <br/>
+            </v-card>
+
+            <v-row v-else>
+              <v-col cols="2" v-if="is_admin">
 
                 <!-- Nächste Kamera Zeiten -->
 
@@ -65,9 +97,9 @@
                     </div>
                 </v-card>
             </v-col>
-            <v-col cols="10">
+            <v-col :cols="is_admin?10:12">
 
-                <v-card>
+                <v-card v-if="is_admin">
 
                     <!-- Team Admin -->
 
@@ -127,23 +159,23 @@
                         <h2>Kamera Equipment</h2> 
                         <v-row><v-col cols="6">
                             <img src="../assets/art/checkout.jpg" width="50" style="float:left;margin-top:10px;margin-right:5px;">
-                            <v-text-field v-model="shooting.camera_checkout" label="Checkout" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
+                            <v-text-field v-model="shooting.camera_checkout" :disabled="!is_admin" label="Checkout" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
                         </v-col><v-col cols="6">
                             <img src="../assets/art/checkin.jpg" width="50" style="float:left;margin-top:10px;margin-right:5px;">
-                            <v-text-field v-model="shooting.camera_checkin" label="Checkin" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
+                            <v-text-field v-model="shooting.camera_checkin" :disabled="!is_admin" label="Checkin" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
                         </v-col></v-row>
 
                         <h2>Studio Equipment</h2> 
                         <v-row><v-col cols="6">
                             <img src="../assets/art/checkout.jpg" width="50" style="float:left;margin-top:10px;margin-right:5px;">
-                            <v-text-field v-model="shooting.studio_checkout" label="Checkout" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
+                            <v-text-field v-model="shooting.studio_checkout" :disabled="!is_admin" label="Checkout" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
                         </v-col><v-col cols="6">
                             <img src="../assets/art/checkin.jpg" width="50" style="float:left;margin-top:10px;margin-right:5px;">
-                            <v-text-field v-model="shooting.studio_checkin" label="Checkin" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
+                            <v-text-field v-model="shooting.studio_checkin" :disabled="!is_admin" label="Checkin" hint="Format 23:59" clearable @change="updateTeam"></v-text-field>
                         </v-col></v-row>
                     </v-card>
 
-                    <v-btn block @click="createShooting(day_of_week_index)">
+                    <v-btn block @click="createShooting(day_of_week_index)" v-if="day_of_week_index >= day_of_week">
                     + Drehblock
                     </v-btn>
 
@@ -154,7 +186,9 @@
             </v-col>
            </v-row>
         </v-container>
-        <v-container v-else>Kein Team ausgewählt.</v-container>
+        <v-container v-else>
+            <p class="mt-5 text-center" style="color:#fff4">Kein Team ausgewählt.</p>
+        </v-container>
     </v-main>
 
 
@@ -162,6 +196,7 @@
 </template>
 
 <script>
+import VueCookies from 'vue-cookies'
 import api_call from "../Api"
 
 export default {
@@ -170,12 +205,13 @@ export default {
   data: function() {
       return {
         current_team: null,
+        current_meal: {meal_omnivores:null,meal_vegans:null,meal_vegetarians:null,meal_total:null,meal_annotation:""},
         current_team_meal: null,
+        is_admin: false,
         teams: []
       }
   },
   computed: {
-    is_admin: function() {return this.cookieTeam < 1 || this.cookieTeam == undefined},
     day_of_week: function() {return 3},
     shootings: function() {
         let shootings = []
@@ -196,6 +232,22 @@ export default {
     }
   },
   methods: {
+    storeMeals: function() {
+        this.current_team.meal_vegans=this.current_meal.meal_vegans
+        this.current_team.meal_vegetarians=this.current_meal.meal_vegetarians
+        this.current_team.meal_omnivores=this.current_meal.meal_omnivores
+        this.current_team.meal_annotation=this.current_meal.meal_annotation
+        this.updateTeam()
+    },
+    lock: function() {
+        VueCookies.set('team.letter' , this.current_team.letter, "1year") 
+        this.is_admin = false
+    },
+    unlock: function() {
+        if(prompt("Admin PIN?") != "2412") return;
+        VueCookies.set('team.letter' , undefined, 1) 
+        this.is_admin = true
+    },
     checkCompleted: function(check) {
         check.team.shootings.filter(shooting=>shooting.id==check.shooting_id)[0]["camera_check"+check.check+"_completed"]="1"
         this.updateTeam(check.team)
@@ -252,12 +304,19 @@ export default {
         api_call("teams","get")
         .then((d)=>{
             this.teams = d;
+            let is_admin=true
             if(d.length>0) {
-
                 if(this.current_team != null)
                     d=this.teams.filter(team=>team.id == this.current_team.id)
+                else if(VueCookies.get('team.letter') != "") {
+                    d=this.teams.filter(team=>team.letter == VueCookies.get('team.letter'))
+                    // backend seeems locked
+                }
                 this.setTeam(d[0])
+                if(VueCookies.get('team.letter') != undefined && VueCookies.get('team.letter') != "")  {is_admin=false}
             }
+            console.log("is ad",is_admin)
+            this.is_admin = is_admin
         })
     }
   },

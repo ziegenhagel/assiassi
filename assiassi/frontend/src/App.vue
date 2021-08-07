@@ -1,6 +1,6 @@
 <template>
-  <v-app style="background:#eee">
-      <Assi cookieTeam="-1"></Assi>
+  <v-app>
+      <Assi></Assi>
   </v-app>
 </template>
 
@@ -19,4 +19,10 @@ export default {
   }),
 };
 </script>
+<style>
+#app {
+    background:#f0ab3f;
+    background:#27333d
+}
+</style>
 
